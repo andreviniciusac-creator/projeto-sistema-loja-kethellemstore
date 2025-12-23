@@ -8,6 +8,9 @@ import { Inventory } from './pages/Inventory';
 import { Users } from './pages/Users';
 import { Reports } from './pages/Reports';
 import { AuditPanel } from './pages/AuditPanel';
+import { Financial } from './pages/Financial';
+import { PCPCalendar } from './pages/PCPCalendar';
+import { Accounting } from './pages/Accounting';
 import { storageService } from './services/storage.ts';
 import { User, UserRole, Product, Sale } from './types';
 
@@ -16,12 +19,10 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [currentPage, setCurrentPage] = useState('login');
   
-  // Data State
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
 
-  // Initialize Check
   useEffect(() => {
     checkInitialization();
   }, []);
@@ -34,7 +35,6 @@ function App() {
       const currentUser = storageService.getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
-        // Default landing page logic
         if (currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.OWNER) {
           setCurrentPage('dashboard');
         } else if (currentUser.role === UserRole.AUDITOR) {
@@ -78,26 +78,21 @@ function App() {
 
   const handleSetupComplete = () => {
     setIsSystemInitialized(true);
-    // After setup, user must login with the credentials they just created
     setCurrentPage('login');
   };
 
-  // 1. Loading State
   if (isSystemInitialized === null) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50">Carregando sistema...</div>;
   }
 
-  // 2. Setup Screen (First Run)
   if (!isSystemInitialized) {
     return <Setup onComplete={handleSetupComplete} />;
   }
 
-  // 3. Login Screen
   if (!user || currentPage === 'login') {
     return <Login onLogin={handleLogin} />;
   }
 
-  // 4. Main App Routing
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -110,6 +105,15 @@ function App() {
       
       case 'products':
         return <Inventory products={products} currentUser={user} onUpdate={refreshData} />;
+      
+      case 'financial':
+        return <Financial currentUser={user} />;
+      
+      case 'accounting':
+        return <Accounting currentUser={user} />;
+      
+      case 'pcp':
+        return <PCPCalendar currentUser={user} />;
       
       case 'users':
         return (user.role === UserRole.ADMIN || user.role === UserRole.OWNER || user.role === UserRole.AUDITOR) ? (

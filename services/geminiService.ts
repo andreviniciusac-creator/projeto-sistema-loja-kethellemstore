@@ -1,23 +1,15 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { Product, Sale } from "../types";
 
-// NOTE: In a real production app, never expose API keys on the client.
-// This is for demonstration purposes as per instructions using process.env.
-// The user must ensure process.env.API_KEY is available in their build environment.
-
-const apiKey = process.env.API_KEY || ''; 
-let ai: GoogleGenAI | null = null;
-
-if (apiKey) {
-  ai = new GoogleGenAI({ apiKey: apiKey });
-}
+// Always use the required initialization format and retrieve the API key from the environment.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const geminiService = {
-  isAvailable: () => !!ai,
+  // Directly check the existence of the API key string for availability.
+  isAvailable: () => !!process.env.API_KEY,
 
   generateProductDescription: async (name: string, category: string, features: string): Promise<string> => {
-    if (!ai) return "Gemini API Key não configurada.";
-
     try {
       const prompt = `Escreva uma descrição atraente, curta e elegante (máximo 40 palavras) para uma loja de roupas feminina.
       Produto: ${name}
@@ -26,11 +18,13 @@ export const geminiService = {
       
       Apenas a descrição, sem aspas.`;
 
+      // Use 'gemini-3-flash-preview' for basic text generation tasks.
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
+      // Extract generated text directly from the response.text property.
       return response.text || "Descrição indisponível.";
     } catch (error) {
       console.error("Erro Gemini:", error);
@@ -39,7 +33,6 @@ export const geminiService = {
   },
 
   analyzeSalesTrend: async (sales: Sale[]): Promise<string> => {
-    if (!ai) return "Análise indisponível. Configure a API Key.";
     if (sales.length === 0) return "Sem dados suficientes para análise.";
 
     // Summarize data for the prompt to save tokens
@@ -66,12 +59,15 @@ export const geminiService = {
     Forneça um insight curto (max 50 palavras) e motivador para a equipe de vendas sobre o desempenho e uma dica rápida.`;
 
     try {
+      // Use 'gemini-3-flash-preview' for complex text reasoning tasks.
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
       });
+      // Extract generated text directly from the response.text property.
       return response.text || "Não foi possível analisar.";
     } catch (error) {
+      console.error("Erro Gemini:", error);
       return "Erro na análise de vendas.";
     }
   }

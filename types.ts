@@ -9,6 +9,10 @@ export type UserStatus = 'Ativo' | 'Férias' | 'Doente' | 'Vendas Externas';
 
 export type PaymentMethod = 'DINHEIRO' | 'PIX' | 'CARTAO' | 'CREDITO_LOJA' | 'OUTRO';
 
+export type ServiceCategory = 'VIDEOMAKER' | 'MANUTENCAO' | 'MARKETING' | 'OUTROS';
+
+export type PCPTaskCategory = 'LOGISTICA' | 'CONFERENCIA' | 'MANUTENCAO' | 'PRODUCAO' | 'MARKETING' | 'EVENTO' | 'OUTROS';
+
 export interface User {
   id: string;
   name: string;
@@ -25,6 +29,14 @@ export interface LoginSession {
   userName: string;
   role: UserRole;
   loginTime: string; // ISO String
+}
+
+export interface Attendance {
+  id: string;
+  date: string;
+  sellerId: string;
+  sellerName: string;
+  wasSale: boolean; // true if it became a sale, false if just a consultation
 }
 
 export interface Product {
@@ -74,6 +86,38 @@ export interface CashAdjustment {
   performedBy: string;
 }
 
+export interface ServiceOrder {
+  id: string;
+  date: string;
+  category: ServiceCategory;
+  providerName: string;
+  description: string;
+  amount: number;
+  status: 'PAGO' | 'PENDENTE';
+  performedBy: string;
+}
+
+export interface Purchase {
+  id: string;
+  date: string;
+  supplierName: string;
+  cnpj: string;
+  totalValue: number;
+  invoiceNumber: string;
+  xmlKey: string;
+  importedAt: string;
+}
+
+export interface PCPTask {
+  id: string;
+  dayOfWeek: number; // 0 (Dom) to 6 (Sab)
+  title: string;
+  description: string;
+  category: PCPTaskCategory;
+  completed: boolean;
+  time?: string;
+}
+
 export interface AuditLog {
   id: string;
   action: string; // e.g., "USER_DELETED"
@@ -99,6 +143,7 @@ export interface DailyClosure {
   totalGifts: number; // Value of items given away
   salesCount: number;
   giftsCount: number;
+  attendancesCount: number;
   adjustmentsTotal: number; // Net value of adjustments
   paymentBreakdown: Record<PaymentMethod, number>;
 }
